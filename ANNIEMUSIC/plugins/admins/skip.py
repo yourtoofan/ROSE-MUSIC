@@ -21,7 +21,7 @@ from ANNIEMUSIC.utils.database import get_loop
 from ANNIEMUSIC.utils.decorators import AdminRightsCheck
 from ANNIEMUSIC.utils.inline.play import stream_markup, telegram_markup
 from ANNIEMUSIC.utils.stream.autoclear import auto_clean
-from ANNIEMUSIC.utils.thumbnails import gen_thumb
+from ANNIEMUSIC.utils.thumbnails import get_thumb as gen_thumb
 
 # Commands
 SKIP_COMMAND = get_command("SKIP_COMMAND")
