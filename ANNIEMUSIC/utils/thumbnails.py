@@ -7,442 +7,120 @@
 #
 # All rights reserved.
 #
-
 import os
-from random import randint
-from typing import Union
+import re
+import aiofiles
+import aiohttp
+from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageFont, ImageOps
+from unidecode import unidecode
+from youtubesearchpython.__future__ import VideosSearch
+from config import YOUTUBE_IMG_URL
 
-from pyrogram.types import InlineKeyboardMarkup
+# Utility functions
+def changeImageSize(maxWidth, maxHeight, image):
+    widthRatio = maxWidth / image.size[0]
+    heightRatio = maxHeight / image.size[1]
+    newWidth = int(widthRatio * image.size[0])
+    newHeight = int(heightRatio * image.size[1])
+    return image.resize((newWidth, newHeight))
 
-import config
-from config import LOG_GROUP_ID, OWNER_ID
-from ANNIEMUSIC import Carbon, YouTube, app
-from ANNIEMUSIC.core.call import ANNIE
-from ANNIEMUSIC.misc import db
-from ANNIEMUSIC.utils.database import (
-    add_active_video_chat,
-    is_active_chat,
-    is_video_allowed,
-)
-from ANNIEMUSIC.utils.exceptions import AssistantErr
-from ANNIEMUSIC.utils.inline.play import queue_markup, stream_markup, telegram_markup
-from ANNIEMUSIC.utils.inline.playlist import close_markup
-from ANNIEMUSIC.utils.pastebin import ANNIEbin
-from ANNIEMUSIC.utils.stream.queue import put_queue, put_queue_index
-from ANNIEMUSIC.utils.thumbnails import gen_qthumb, gen_thumb
+def truncate(text):
+    words = text.split(" ")
+    text1, text2 = "", ""
+    for word in words:
+        if len(text1) + len(word) < 30:
+            text1 += " " + word
+        elif len(text2) + len(word) < 30:
+            text2 += " " + word
+    return [text1.strip(), text2.strip()]
 
+def crop_center_circle(img, output_size, border, crop_scale=1.5):
+    half_width, half_height = img.size[0] / 2, img.size[1] / 2
+    larger_size = int(output_size * crop_scale)
+    img = img.crop((
+        half_width - larger_size / 2,
+        half_height - larger_size / 2,
+        half_width + larger_size / 2,
+        half_height + larger_size / 2
+    ))
+    img = img.resize((output_size - 2 * border, output_size - 2 * border))
 
-async def stream(
-    _,
-    mystic,
-    user_id,
-    result,
-    chat_id,
-    user_name,
-    original_chat_id,
-    video: Union[bool, str] = None,
-    streamtype: Union[bool, str] = None,
-    spotify: Union[bool, str] = None,
-    forceplay: Union[bool, str] = None,
-):
-    if not result:
-        return
-    if video:
-        if not await is_video_allowed(chat_id):
-            raise AssistantErr(_["play_7"])
-    if forceplay:
-        await ANNIE.force_stop_stream(chat_id)
-    if streamtype == "playlist":
-        msg = f"{_['playlist_16']}\n\n"
-        count = 0
-        for search in result:
-            if int(count) == config.PLAYLIST_FETCH_LIMIT:
-                continue
-            try:
-                (
-                    title,
-                    duration_min,
-                    duration_sec,
-                    thumbnail,
-                    vidid,
-                ) = await YouTube.details(search, False if spotify else True)
-            except:
-                continue
-            if str(duration_min) == "None":
-                continue
-            if duration_sec > config.DURATION_LIMIT:
-                continue
-            if await is_active_chat(chat_id):
-                await put_queue(
-                    chat_id,
-                    original_chat_id,
-                    f"vid_{vidid}",
-                    title,
-                    duration_min,
-                    user_name,
-                    vidid,
-                    user_id,
-                    "video" if video else "audio",
-                )
-                position = len(db.get(chat_id)) - 1
-                count += 1
-                msg += f"{count}- {title[:70]}\n"
-                msg += f"{_['playlist_17']} {position}\n\n"
-            else:
-                if not forceplay:
-                    db[chat_id] = []
-                status = True if video else None
-                try:
-                    file_path, direct = await YouTube.download(
-                        vidid, mystic, video=status, videoid=True
-                    )
-                except:
-                    await mystic.delete()
-                    await app.send_message(
-                        LOG_GROUP_ID,
-                        f"**ʜᴇʏ [ᴏᴡɴᴇʀ](tg://user?id={OWNER_ID[0]}) ᴍᴀʏ ʙᴇ ᴍʏ ᴄᴏᴏᴋɪᴇs ʜᴀs ʙᴇᴇɴ ᴅᴇᴀᴅ ᴘʟᴇᴀsᴇ ᴄʜᴇᴄᴋ ᴏɴᴇ ᴛɪᴍᴇ ʙʏ ᴘʟᴀʏ ᴀɴʏ sᴏɴɢs**",
-                    )
-                    return await app.send_message(
-                        OWNER_ID[0],
-                        f"**ʜᴇʏ [ᴏᴡɴᴇʀ](tg://user?id={OWNER_ID[0]}) ᴍᴀʏ ʙᴇ ᴍʏ ᴄᴏᴏᴋɪᴇs ʜᴀs ʙᴇᴇɴ ᴅᴇᴀᴅ ᴘʟᴇᴀsᴇ ᴄʜᴇᴄᴋ ᴏɴᴇ ᴛɪᴍᴇ ʙʏ ᴘʟᴀʏ ᴀɴʏ sᴏɴɢs**",
-                    )
+    final_img = Image.new("RGBA", (output_size, output_size), "white")
+    mask_main = Image.new("L", (output_size - 2 * border, output_size - 2 * border), 0)
+    draw_main = ImageDraw.Draw(mask_main)
+    draw_main.ellipse((0, 0, output_size - 2 * border, output_size - 2 * border), fill=255)
+    final_img.paste(img, (border, border), mask_main)
 
-                await ANNIE.join_call(
-                    chat_id, original_chat_id, file_path, video=status, image=thumbnail
-                )
-                await put_queue(
-                    chat_id,
-                    original_chat_id,
-                    file_path if direct else f"vid_{vidid}",
-                    title,
-                    duration_min,
-                    user_name,
-                    vidid,
-                    user_id,
-                    "video" if video else "audio",
-                    forceplay=forceplay,
-                )
-                img = await gen_thumb(vidid)
-                button = stream_markup(_, vidid, chat_id)
-                run = await app.send_photo(
-                    original_chat_id,
-                    photo=img,
-                    caption=_["stream_1"].format(
-                        title[:27],
-                        f"https://t.me/{app.username}?start=info_{vidid}",
-                        duration_min,
-                        user_name,
-                    ),
-                    reply_markup=InlineKeyboardMarkup(button),
-                )
-                db[chat_id][0]["mystic"] = run
-                db[chat_id][0]["markup"] = "stream"
-        if count == 0:
-            return
-        else:
-            link = await ANNIEbin(msg)
-            lines = msg.count("\n")
-            if lines >= 17:
-                car = os.linesep.join(msg.split(os.linesep)[:17])
-            else:
-                car = msg
-            carbon = await Carbon.generate(car, randint(100, 10000000))
-            upl = close_markup(_)
-            return await app.send_photo(
-                original_chat_id,
-                photo=carbon,
-                caption=_["playlist_18"].format(link, position),
-                reply_markup=upl,
-            )
-    elif streamtype == "youtube":
-        link = result["link"]
-        vidid = result["vidid"]
-        title = (result["title"]).title()
-        duration_min = result["duration_min"]
-        thumbnail = result["thumb"]
-        status = True if video else None
-        try:
-            file_path, direct = await YouTube.download(
-                vidid, mystic, videoid=True, video=status
-            )
-        except:
-            await mystic.delete()
-            await app.send_message(
-                LOG_GROUP_ID,
-                f"**ʜᴇʏ [ᴏᴡɴᴇʀ](tg://user?id={OWNER_ID[0]}) ᴍᴀʏ ʙᴇ ᴍʏ ᴄᴏᴏᴋɪᴇs ʜᴀs ʙᴇᴇɴ ᴅᴇᴀᴅ ᴘʟᴇᴀsᴇ ᴄʜᴇᴄᴋ ᴏɴᴇ ᴛɪᴍᴇ ʙʏ ᴘʟᴀʏ ᴀɴʏ sᴏɴɢs**",
-            )
-            return await app.send_message(
-                OWNER_ID[0],
-                f"**ʜᴇʏ [ᴏᴡɴᴇʀ](tg://user?id={OWNER_ID[0]}) ᴍᴀʏ ʙᴇ ᴍʏ ᴄᴏᴏᴋɪᴇs ʜᴀs ʙᴇᴇɴ ᴅᴇᴀᴅ ᴘʟᴇᴀsᴇ ᴄʜᴇᴄᴋ ᴏɴᴇ ᴛɪᴍᴇ ʙʏ ᴘʟᴀʏ ᴀɴʏ sᴏɴɢs**",
-            )
+    mask_border = Image.new("L", (output_size, output_size), 0)
+    draw_border = ImageDraw.Draw(mask_border)
+    draw_border.ellipse((0, 0, output_size, output_size), fill=255)
+    
+    return Image.composite(final_img, Image.new("RGBA", final_img.size, (0, 0, 0, 0)), mask_border)
 
-        if await is_active_chat(chat_id):
-            await put_queue(
-                chat_id,
-                original_chat_id,
-                file_path if direct else f"vid_{vidid}",
-                title,
-                duration_min,
-                user_name,
-                vidid,
-                user_id,
-                "video" if video else "audio",
-            )
-            position = len(db.get(chat_id)) - 1
-            qimg = await gen_qthumb(vidid)
-            button = queue_markup(_, vidid, chat_id)
-            run = await app.send_photo(
-                original_chat_id,
-                photo=qimg,
-                caption=_["queue_4"].format(
-                    position, title[:27], duration_min, user_name
-                ),
-                reply_markup=InlineKeyboardMarkup(button),
-            )
-        else:
-            if not forceplay:
-                db[chat_id] = []
-            await ANNIE.join_call(
-                chat_id, original_chat_id, file_path, video=status, image=thumbnail
-            )
-            await put_queue(
-                chat_id,
-                original_chat_id,
-                file_path if direct else f"vid_{vidid}",
-                title,
-                duration_min,
-                user_name,
-                vidid,
-                user_id,
-                "video" if video else "audio",
-                forceplay=forceplay,
-            )
-            img = await gen_thumb(vidid)
-            button = stream_markup(_, vidid, chat_id)
-            try:
-                run = await app.send_photo(
-                    original_chat_id,
-                    photo=img,
-                    caption=_["stream_1"].format(
-                        title[:27],
-                        f"https://t.me/{app.username}?start=info_{vidid}",
-                        duration_min,
-                        user_name,
-                    ),
-                    reply_markup=InlineKeyboardMarkup(button),
-                )
-                db[chat_id][0]["mystic"] = run
-                db[chat_id][0]["markup"] = "stream"
-            except Exception as ex:
-                print(ex)
-    elif streamtype == "soundcloud":
-        file_path = result["filepath"]
-        title = result["title"]
-        duration_min = result["duration_min"]
-        if await is_active_chat(chat_id):
-            await put_queue(
-                chat_id,
-                original_chat_id,
-                file_path,
-                title,
-                duration_min,
-                user_name,
-                streamtype,
-                user_id,
-                "audio",
-            )
-            position = len(db.get(chat_id)) - 1
-            await app.send_message(
-                original_chat_id,
-                _["queue_4"].format(position, title[:30], duration_min, user_name),
-            )
-        else:
-            if not forceplay:
-                db[chat_id] = []
-            await ANNIE.join_call(chat_id, original_chat_id, file_path, video=None)
-            await put_queue(
-                chat_id,
-                original_chat_id,
-                file_path,
-                title,
-                duration_min,
-                user_name,
-                streamtype,
-                user_id,
-                "audio",
-                forceplay=forceplay,
-            )
-            button = telegram_markup(_, chat_id)
-            run = await app.send_photo(
-                original_chat_id,
-                photo=config.SOUNCLOUD_IMG_URL,
-                caption=_["stream_1"].format(
-                    title, config.SUPPORT_GROUP, duration_min, user_name
-                ),
-                reply_markup=InlineKeyboardMarkup(button),
-            )
-            db[chat_id][0]["mystic"] = run
-            db[chat_id][0]["markup"] = "tg"
-    elif streamtype == "telegram":
-        file_path = result["path"]
-        link = result["link"]
-        title = (result["title"]).title()
-        duration_min = result["dur"]
-        status = True if video else None
-        if await is_active_chat(chat_id):
-            await put_queue(
-                chat_id,
-                original_chat_id,
-                file_path,
-                title,
-                duration_min,
-                user_name,
-                streamtype,
-                user_id,
-                "video" if video else "audio",
-            )
-            position = len(db.get(chat_id)) - 1
-            await app.send_message(
-                original_chat_id,
-                _["queue_4"].format(position, title[:30], duration_min, user_name),
-            )
-        else:
-            if not forceplay:
-                db[chat_id] = []
-            await ANNIE.join_call(chat_id, original_chat_id, file_path, video=status)
-            await put_queue(
-                chat_id,
-                original_chat_id,
-                file_path,
-                title,
-                duration_min,
-                user_name,
-                streamtype,
-                user_id,
-                "video" if video else "audio",
-                forceplay=forceplay,
-            )
-            if video:
-                await add_active_video_chat(chat_id)
-            button = telegram_markup(_, chat_id)
-            run = await app.send_photo(
-                original_chat_id,
-                photo=config.TELEGRAM_VIDEO_URL if video else config.TELEGRAM_AUDIO_URL,
-                caption=_["stream_1"].format(title, link, duration_min, user_name),
-                reply_markup=InlineKeyboardMarkup(button),
-            )
-            db[chat_id][0]["mystic"] = run
-            db[chat_id][0]["markup"] = "tg"
-    elif streamtype == "live":
-        link = result["link"]
-        vidid = result["vidid"]
-        title = (result["title"]).title()
-        thumbnail = result["thumb"]
-        duration_min = "00:00"
-        status = True if video else None
-        if await is_active_chat(chat_id):
-            await put_queue(
-                chat_id,
-                original_chat_id,
-                f"live_{vidid}",
-                title,
-                duration_min,
-                user_name,
-                vidid,
-                user_id,
-                "video" if video else "audio",
-            )
-            position = len(db.get(chat_id)) - 1
-            await app.send_message(
-                original_chat_id,
-                _["queue_4"].format(position, title[:30], duration_min, user_name),
-            )
-        else:
-            if not forceplay:
-                db[chat_id] = []
-            n, file_path = await YouTube.video(link)
-            if n == 0:
-                raise AssistantErr(_["str_3"])
-            await ANNIE.join_call(
-                chat_id,
-                original_chat_id,
-                file_path,
-                video=status,
-                image=thumbnail if thumbnail else None,
-            )
-            await put_queue(
-                chat_id,
-                original_chat_id,
-                f"live_{vidid}",
-                title,
-                duration_min,
-                user_name,
-                vidid,
-                user_id,
-                "video" if video else "audio",
-                forceplay=forceplay,
-            )
-            img = await gen_thumb(vidid)
-            button = telegram_markup(_, chat_id)
-            run = await app.send_photo(
-                original_chat_id,
-                photo=img,
-                caption=_["stream_1"].format(
-                    title[:27],
-                    f"https://t.me/{app.username}?start=info_{vidid}",
-                    duration_min,
-                    user_name,
-                ),
-                reply_markup=InlineKeyboardMarkup(button),
-            )
-            db[chat_id][0]["mystic"] = run
-            db[chat_id][0]["markup"] = "tg"
-    elif streamtype == "index":
-        link = result
-        title = "Index or M3u8 Link"
-        duration_min = "URL stream"
-        if await is_active_chat(chat_id):
-            await put_queue_index(
-                chat_id,
-                original_chat_id,
-                "index_url",
-                title,
-                duration_min,
-                user_name,
-                link,
-                "video" if video else "audio",
-            )
-            position = len(db.get(chat_id)) - 1
-            await mystic.edit_text(
-                _["queue_4"].format(position, title[:30], duration_min, user_name)
-            )
-        else:
-            if not forceplay:
-                db[chat_id] = []
-            await ANNIE.join_call(
-                chat_id,
-                original_chat_id,
-                link,
-                video=True if video else None,
-            )
-            await put_queue_index(
-                chat_id,
-                original_chat_id,
-                "index_url",
-                title,
-                duration_min,
-                user_name,
-                link,
-                "video" if video else "audio",
-                forceplay=forceplay,
-            )
-            button = telegram_markup(_, chat_id)
-            run = await app.send_photo(
-                original_chat_id,
-                photo=config.STREAM_IMG_URL,
-                caption=_["stream_2"].format(user_name),
-                reply_markup=InlineKeyboardMarkup(button),
-            )
-            db[chat_id][0]["mystic"] = run
-            db[chat_id][0]["markup"] = "tg"
-            await mystic.delete()
+# Main function to generate thumbnail
+async def get_thumb(videoid):
+    # Check if cached thumbnail exists
+    if os.path.isfile(f"cache/{videoid}_v4.png"):
+        return f"cache/{videoid}_v4.png"
+    
+    try:
+        # Search video on YouTube
+        query = f"https://www.youtube.com/watch?v={videoid}"
+        results = VideosSearch(query, limit=1)
+        for result in (await results.next())["result"]:
+            title = re.sub(r"\W+", " ", result.get("title", "Unsupported Title")).title()
+            duration = result.get("duration", "Unknown Mins")
+            thumbnail_url = result["thumbnails"][0]["url"].split("?")[0]
+            views = result.get("viewCount", {}).get("short", "Unknown Views")
+            channel = result.get("channel", {}).get("name", "Unknown Channel")
+        
+        # Download thumbnail image
+        async with aiohttp.ClientSession() as session:
+            async with session.get(thumbnail_url) as resp:
+                if resp.status == 200:
+                    f = await aiofiles.open(f"cache/thumb{videoid}.png", mode="wb")
+                    await f.write(await resp.read())
+                    await f.close()
+
+        youtube_img = Image.open(f"cache/thumb{videoid}.png")
+        image1 = changeImageSize(1280, 720, youtube_img)
+        image2 = image1.convert("RGBA")
+        background = ImageEnhance.Brightness(image2.filter(ImageFilter.BoxBlur(20))).enhance(0.6)
+
+        # Draw details on the thumbnail
+        draw = ImageDraw.Draw(background)
+        arial = ImageFont.truetype("ANNIEMUSIC/assets/thumb/font2.ttf", 30)
+        title_font = ImageFont.truetype("ANNIEMUSIC/assets/thumb/font3.ttf", 45)
+        circle_thumbnail = crop_center_circle(youtube_img, 400, 20).resize((400, 400))
+
+        # Positions and text for overlay
+        circle_position = (120, 160)
+        text_x_position = 565
+        background.paste(circle_thumbnail, circle_position, circle_thumbnail)
+
+        title1 = truncate(title)
+        draw.text((text_x_position, 180), title1[0], fill=(255, 255, 255), font=title_font)
+        draw.text((text_x_position, 230), title1[1], fill=(255, 255, 255), font=title_font)
+        draw.text((text_x_position, 320), f"{channel} | {views[:23]}", (255, 255, 255), font=arial)
+
+        # Duration line and play icons
+        line_length = 580
+        red_length = int(line_length * 0.6)
+        draw.line([(text_x_position, 380), (text_x_position + red_length, 380)], fill="red", width=9)
+        draw.line([(text_x_position + red_length, 380), (text_x_position + line_length, 380)], fill="white", width=8)
+        draw.ellipse([(text_x_position + red_length - 10, 370), (text_x_position + red_length + 10, 390)], fill="red")
+
+        draw.text((text_x_position, 400), "00:00", (255, 255, 255), font=arial)
+        draw.text((1080, 400), duration, (255, 255, 255), font=arial)
+        play_icons = Image.open("ANNIEMUSIC/assets/thumb/play_icons.png").resize((580, 62))
+        background.paste(play_icons, (text_x_position, 450), play_icons)
+
+        # Clean up and save
+        os.remove(f"cache/thumb{videoid}.png")
+        background.save(f"cache/{videoid}_v4.png")
+        return f"cache/{videoid}_v4.png"
+
+    except Exception:
+        return YOUTUBE_IMG_URL
+                    
+                                
