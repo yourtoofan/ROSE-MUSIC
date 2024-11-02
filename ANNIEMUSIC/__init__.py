@@ -20,7 +20,7 @@ heroku()
 
 sudo()
 
-ANNIEboy()
+anniegirl()
 
 app = ANNIEBot()
 
