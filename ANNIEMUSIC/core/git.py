@@ -11,16 +11,12 @@
 import asyncio
 import shlex
 from typing import Tuple
-
 from git import Repo
 from git.exc import GitCommandError, InvalidGitRepositoryError
-
 import config
-
 from ..logging import LOGGER
 
 loop = asyncio.get_event_loop_policy().get_event_loop()
-
 
 def install_req(cmd: str) -> Tuple[str, str, int, int]:
     async def install_requirements():
@@ -39,7 +35,6 @@ def install_req(cmd: str) -> Tuple[str, str, int, int]:
         )
 
     return loop.run_until_complete(install_requirements())
-
 
 def git():
     REPO_LINK = config.UPSTREAM_REPO
@@ -83,3 +78,6 @@ def git():
         repo.git.reset("--hard", "FETCH_HEAD")
     install_req("pip3 install --no-cache-dir -r requirements.txt")
     LOGGER(__name__).info(f"Fetched Updates from: UPSTREAM_REPO")
+
+# Ensure the config.py file has the correct branch name
+config.UPSTREAM_BRANCH = "main"  # Change to 'main' if your repo uses 'main' instead of 'master'
