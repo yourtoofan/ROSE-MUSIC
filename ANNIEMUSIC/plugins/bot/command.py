@@ -1,18 +1,8 @@
 import asyncio
-import importlib
 from pyrogram import filters, idle
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message
 
-import config
-from config import BANNED_USERS
-from ANNIEMUSIC import HELPABLE, LOGGER, app, userbot
-from ANNIEMUSIC.core.call import ANNIE
-from ANNIEMUSIC.plugins import ALL_MODULES
-from ANNIEMUSIC.utils.database import get_banned_users, get_gbanned
-
-# Reload modules if needed
-for module in ALL_MODULES:
-    importlib.import_module(f"ANNIEMUSIC.plugins.{module}")
+from config import LOGGER, app
 
 # Handle /help command in group only
 @app.on_message(filters.command("help"))
@@ -63,7 +53,6 @@ async def start_command(client, message: Message):
     await client.send_message(
         chat_id=message.chat.id,
         text=start_text,
-        photo=photo_url,
         reply_markup=keyboard,
     )
 
@@ -71,10 +60,6 @@ async def start_command(client, message: Message):
 async def start_bot():
     await app.start()
     LOGGER.info("Bot started and running!")
-    
-    for module in ALL_MODULES:
-        importlib.reload(importlib.import_module(f"ANNIEMUSIC.plugins.{module}"))
-        
     await idle()
 
 if __name__ == "__main__":
