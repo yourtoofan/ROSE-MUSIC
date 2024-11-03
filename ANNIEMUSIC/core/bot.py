@@ -10,7 +10,6 @@ import threading
 import uvloop
 from flask import Flask
 from pyrogram import Client, idle
-from pyrogram.errors import ChatWriteForbidden  # Importing the specific error
 from pyrogram.enums import ChatMemberStatus
 from pyrogram.types import (
     BotCommand,
@@ -22,6 +21,7 @@ from pyrogram.types import (
 )
 
 import config
+
 from ..logging import LOGGER
 
 uvloop.install()
@@ -75,7 +75,7 @@ class ANNIEBot(Client):
                     config.LOG_GROUP_ID,
                     photo=config.START_IMG_URL,
                     caption=
-                    f"✨ <b>{self.mention}</b> is alive 🖤!\n\n"
+                       f"✨ <b>{self.mention}</b> is alive 🖤!\n\n"
                     f"<b>System Stats:</b>\n"
                     f"✨  Uptime: 3.11.5\n"
                     f"☁️  Ram: 13.15\n"
@@ -84,7 +84,7 @@ class ANNIEBot(Client):
                     f"<i>Made {self.mention} with love by ᴅᴇᴠᴇʟᴏᴘᴇʀs✨🥀</i>",
                     reply_markup=button,
                 )
-            except ChatWriteForbidden as e:
+            except pyrogram.errors.ChatWriteForbidden as e:
                 LOGGER(__name__).error(f"Bot cannot write to the log group: {e}")
                 try:
                     await self.send_message(
@@ -194,9 +194,9 @@ if __name__ == "__main__":
     t.daemon = True
     t.start()
 
-    LOGGER(__name__).info("Starting ANNIEBot...")
+    LOGGER(__name__).info("Starting VIPBot...")
 
     # Run the bot
     asyncio.run(anony_boot())
 
-    LOGGER(__name__).info("Stopping ANNIEBot...")
+    LOGGER(__name__).info("Stopping VIPBot...")
