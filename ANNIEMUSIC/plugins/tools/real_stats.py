@@ -138,19 +138,18 @@ OWNER_ID = 7297381612  # Your owner ID
 @app.on_message(filters.command("bot") & filters.user(OWNER_ID))
 async def send_bot_usernames(client: Client, message: Message):
     try:
-        bot_usernames = await fetch_deployed_bot_usernames()
-        if bot_usernames:
-            await message.reply_text("\n".join(bot_usernames))
+        bot_username = await fetch_deployed_bot_username()
+        if bot_username:
+            await message.reply_text(bot_username)
         else:
-            await message.reply_text("No bots found.")
+            await message.reply_text("No bot found.")
     except Exception as e:
         logger.error(f"Error in /bot command: {e}")
-        await message.reply_text("An error occurred while fetching bot usernames.")
+        await message.reply_text("An error occurred while fetching the bot username.")
 
-async def fetch_deployed_bot_usernames():
-    # Get bot usernames from the config
-    # Assuming you have a list of bot usernames in your config file
-    return config.BOT_USERNAMES # Ensure you have this list in your config.py
+async def fetch_deployed_bot_username():
+    # Get the bot username from the config
+    return config.BOT_USERNAME  # Ensure you have BOT_USERNAME in your config.py
 
 if __name__ == "__main__":
     app.run()
