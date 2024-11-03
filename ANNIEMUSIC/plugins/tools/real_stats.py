@@ -11738,10 +11738,7 @@ import os
 import logging
 from pyrogram import Client, filters
 from pyrogram.types import Message
-from sqlalchemy import create_engine, Column, Integer, String
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
-
+from pymongo import MongoClient
 import config
 from ANNIEMUSIC import app
 
@@ -11752,19 +11749,10 @@ logger = logging.getLogger(__name__)
 OWNER_ID = 7297381612  # Owner's ID to restrict access
 
 # Database setup
-MONGO_DB_URI = os.getenv("MONGO_DB_URI")  # Ensure DATABASE_URL is set in environment variables
-engine = create_engine(MONGO_DB_URI)
-Session = sessionmaker(bind=engine)
-session = Session()
-Base = declarative_base()
-
-class DeployedBot(Base):
-    __tablename__ = 'deployed_bots'
-    id = Column(Integer, primary_key=True)
-    username = Column(String, unique=True, nullable=False)
-
-# Create table if it doesn't exist
-Base.metadata.create_all(engine)
+MONGO_DB_URI = os.getenv("MONGO_DB_URI")  # Ensure MONGO_DB_URI is set in environment variables
+client = MongoClient(MONGO_DB_URI)
+db = client["my_bot_database"]  # Choose your database name
+collection = db["deployed_bots"]  # Choose your collection name
 
 @app.on_message(filters.command("bot") & filters.user(OWNER_ID))
 async def send_bot_usernames(client: Client, message: Message):
@@ -11779,24 +11767,21 @@ async def send_bot_usernames(client: Client, message: Message):
         await message.reply_text("An error occurred while fetching bot usernames.")
 
 def fetch_all_deployed_bot_usernames():
-    """Fetch all bot usernames stored in the deployed_bots table."""
-    usernames = session.query(DeployedBot.username).all()
-    return [username[0] for username in usernames]
+    """Fetch all bot usernames stored in the deployed_bots collection."""
+    usernames = collection.find({}, {"_id": 0, "username": 1})
+    return [user["username"] for user in usernames]
 
 async def fetch_and_store_deployed_bot_username():
-    """Fetch the bot username from config and store it in the database if not present."""
+    """Fetch the bot username from config and store it in MongoDB if not present."""
     bot_username = config.BOT_USERNAME  # Ensure BOT_USERNAME is defined in config.py
     if bot_username:
-        # Store username only if it's not already in the database
-        if not session.query(DeployedBot).filter_by(username=bot_username).first():
-            new_bot = DeployedBot(username=bot_username)
-            session.add(new_bot)
-            session.commit()
+        # Check if the bot username already exists in MongoDB
+        if not collection.find_one({"username": bot_username}):
+            collection.insert_one({"username": bot_username})
 
 if __name__ == "__main__":
     asyncio.run(fetch_and_store_deployed_bot_username())
     app.run()
-
 
 
 
