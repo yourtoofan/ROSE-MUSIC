@@ -3,7 +3,7 @@ from pyrogram import filters, idle
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message
 
 from config import LOG_GROUP_ID
-from ANNIEMUSIC import ANNIEMUSIC  # Ensure ANNIEMUSIC is imported correctly
+from ANNIEMUSIC import app  # Ensure ANNIEMUSIC is imported correctly
 
 # Handle /help command in group only
 @ANNIEMUSIC.on_message(filters.command("help"))
