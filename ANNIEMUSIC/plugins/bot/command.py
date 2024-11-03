@@ -56,3 +56,12 @@ async def start_command(client, message: Message):
         text=start_text,
         reply_markup=keyboard,
     )
+
+# Initialize and start the bot
+async def start_bot():
+    await app.start()
+    LOGGER.info("Bot started and running!")
+    await idle()
+
+if __name__ == "__main__":
+    asyncio.run(start_bot())
