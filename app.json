@@ -29,6 +29,11 @@
         "value": "",
         "required": true
       },
+      "BOT_USERNAME": {
+        "description": "A Bot's username Get it from @Botfather",
+        "value": "musicXanime_bot",
+        "required": true
+      },
       "EXTRA_PLUGINS": {
         "description": "if You want to load extra plugins with music plugins so fill (True)  if you don't want to load extra plugins so fill (False)",
         "value": "True",
