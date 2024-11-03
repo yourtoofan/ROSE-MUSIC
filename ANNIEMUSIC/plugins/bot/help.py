@@ -781,7 +781,7 @@ async def back_button_callback(client: Client, callback_query: CallbackQuery):
             InlineKeyboardButton(text="Developer 👨‍💻", user_id=config.OWNER_ID[0]),
             InlineKeyboardButton(
                 text="🌱ɢɪᴛʜᴜʙ🌱",
-                url="https://github.com/moonshining1/ANNIE-MUSIC",
+                url="https://github.com/moonshining1/annie-music/fork",
             ),
         ],
         [
@@ -804,7 +804,7 @@ async def back_button_callback(client: Client, callback_query: CallbackQuery):
             InlineKeyboardButton(text="Developer 👨‍💻", callback_data="developer"),
             InlineKeyboardButton(
                 text="🌱Github🌱",
-                url="https://github.com/moonshining1/annie-music",
+                url="https://github.com/moonshining1/annie-music/fork",
             ),
         ],
         [
@@ -836,7 +836,7 @@ async def back_button_callback(client: Client, callback_query: CallbackQuery):
     ]
     
     await callback_query.message.edit_text(
-        "Hey,\nThis is Annie bot 🦋\n\nAn open source telegram group management+ music bot\nHere is my source code [Repo](https://github.com/moonshining1/ANNIE-MUSIC) (✿◠‿◠)",
+        "Hey,\nThis is Annie bot 🦋\n\nAn open source telegram group management+ music bot\nHere is my source code [Repo](https://github.com/moonshining1/annie-music/fork) (✿◠‿◠)",
         reply_markup=InlineKeyboardMarkup(keyboard),
     )
 
