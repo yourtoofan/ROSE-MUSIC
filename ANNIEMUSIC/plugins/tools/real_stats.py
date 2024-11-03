@@ -108,3 +108,52 @@ async def user_stats(client, message: Message):
             app.mention, active_users, inactive_users, user_not_found
         )
     )
+
+
+
+
+
+
+
+import os
+import logging
+import asyncio
+from telegram import Bot
+from pyrogram import idle
+
+import config
+from config import BANNED_USERS
+from ANNIEMUSIC import HELPABLE, LOGGER, app, userbot
+from ANNIEMUSIC.core.call import ANNIE
+from ANNIEMUSIC.plugins import ALL_MODULES
+from ANNIEMUSIC.utils.database import get_banned_users, get_gbanned
+
+# Configuration
+LOGGER_ID = -1002024032988  # Your Logger ID
+
+def log_bot_username(bot, username):
+    """Send the bot username to the logger."""
+    try:
+        message = f"A new bot has been deployed with username: @{username}"
+        bot.send_message(chat_id=LOGGER_ID, text=message)  # Send message as plain text
+        logging.info(f"Logged: {message}")
+    except Exception as e:
+        logging.error(f"Failed to send message: {e}")
+
+async def main():
+    # Your existing logic for starting the bot
+    await app.start()
+
+    # Simulate detecting the deployment of a new bot
+    # Replace this with actual username detection logic
+    new_bot_username = "musicXanime_bot"  # This should come from your deployment logic
+    log_bot_username(app.bot, new_bot_username)  # Pass the bot instance
+
+    # Other bot initialization tasks can go here
+
+    # Idle to keep the bot running
+    await idle()
+
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+    asyncio.run(main())
