@@ -145,7 +145,7 @@ async def help(client: Client, message: Message):
 
 
 @app.on_message(
-    filters.command("strat") & filters.group
+    filters.command("start") & filters.group
 )
 async def help(client: Client, message: Message):
     await message.reply_photo(
@@ -155,9 +155,9 @@ async def help(client: Client, message: Message):
             [
                 [
                     InlineKeyboardButton(
-                        "• Update  •", url="https://t.me/kittyxupdates"),
+                        "Add me", url="https://t.me/musicXanime_bot?startgroup=true"),
                     InlineKeyboardButton(
-                        "• Support •", url="https://t.me/grandxmasti")  # New button added
+                        "Update", url="https://t.me/kittyxupdates")  # New button added
                 ]
             ]
         ),
