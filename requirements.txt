@@ -4,6 +4,7 @@ pyromod
 openai
 aiofiles
 aiohttp
+pymongo
 asyncio
 beautifulsoup4
 dnspython
@@ -32,6 +33,7 @@ spotipy
 tgcrypto
 urllib3
 uvloop
+pyrogram 
 flask
 gunicorn==20.1.0
 git+https://github.com/KurimuzonAkuma/pyrogram@dev
