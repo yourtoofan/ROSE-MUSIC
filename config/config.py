@@ -79,14 +79,6 @@ OWNER_ID = list(
     map(int, getenv("OWNER_ID", "7297381612").split())
 )  # Input type must be interger
 
-
-# make your bots privacy from telegra.ph and put your url here
-
-PRIVACY_LINK = getenv(
-    "PRIVACY_LINK", "https://telegra.ph/Privacy-Policy-for-VIPMUSIC-08-30"
-)
-
-
 # Get it from http://dashboard.heroku.com/account
 HEROKU_API_KEY = getenv("HEROKU_API_KEY")
 
