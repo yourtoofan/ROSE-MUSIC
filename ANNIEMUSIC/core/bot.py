@@ -6,7 +6,6 @@
 
 import asyncio
 import threading
-
 import uvloop
 from flask import Flask
 from pyrogram import Client, idle
@@ -19,25 +18,21 @@ from pyrogram.types import (
     InlineKeyboardButton,
     InlineKeyboardMarkup,
 )
-
 import config
-
 from ..logging import LOGGER
 
+# Install uvloop for better performance
 uvloop.install()
 
-# Flask app initialize
+# Flask app initialization
 app = Flask(__name__)
-
 
 @app.route("/")
 def home():
     return "Bot is running"
 
-
 def run():
     app.run(host="0.0.0.0", port=8000, debug=False)
-
 
 # ANNIEBot Class
 class ANNIEBot(Client):
@@ -70,121 +65,111 @@ class ANNIEBot(Client):
         )
 
         if config.LOG_GROUP_ID:
-            try:
-                await self.send_photo(
-                    config.LOG_GROUP_ID,
-                    photo=config.START_IMG_URL,
-                    caption=
-                    f"✨ <b>{self.mention}</b> is alive 🖤!\n\n"
-                    f"<b>System Stats:</b>\n"
-                    f"✨  Uptime: 3.11.5\n"
-                    f"☁️  Ram: 13.15\n"
-                    f"❄️  Cpu: 1.34.0\n"
-                    f"🔮  Disk: 2.0.106\n\n"
-                    f"<i>Made {self.mention} with love by ᴅᴇᴠᴇʟᴏᴘᴇʀs✨🥀</i>",
-                    reply_markup=button,
-                )
-            except pyrogram.errors.ChatWriteForbidden as e:
-                LOGGER(__name__).error(f"Bot cannot write to the log group: {e}")
-                try:
-                    await self.send_message(
-                        config.LOG_GROUP_ID,
-                    f"✨ <b>{self.mention}</b> is alive 🖤!\n\n"
-                    f"<b>System Stats:</b>\n"
-                    f"✨  Uptime: 3.11.5\n"
-                    f"☁️  Ram: 13.15\n"
-                    f"❄️  Cpu: 1.34.0\n"
-                    f"🔮  Disk: 2.0.106\n\n"
-                    f"<i>Made {self.mention} with love by ᴅᴇᴠᴇʟᴏᴘᴇʀs✨🥀</i>",
-                        reply_markup=button,
-                    )
-                except Exception as e:
-                    LOGGER(__name__).error(f"Failed to send message in log group: {e}")
-            except Exception as e:
-                LOGGER(__name__).error(
-                    f"Unexpected error while sending to log group: {e}"
-                )
-        else:
-            LOGGER(__name__).warning(
-                "LOG_GROUP_ID is not set, skipping log group notifications."
-            )
-        if config.SET_CMDS:
-            try:
-                await self.set_bot_commands(
-                    commands=[
-                        BotCommand("start", "Start the bot"),
-                        BotCommand("help", "Get the help menu"),
-                        BotCommand("ping", "Check if the bot is alive or dead"),
-                    ],
-                    scope=BotCommandScopeAllPrivateChats(),
-                )
-                await self.set_bot_commands(
-                    commands=[
-                        BotCommand("play", "Start playing requested song"),
-                        BotCommand("stop", "Stop the current song"),
-                        BotCommand("pause", "Pause the current song"),
-                        BotCommand("resume", "Resume the paused song"),
-                        BotCommand("queue", "Check the queue of songs"),
-                        BotCommand("skip", "Skip the current song"),
-                        BotCommand("volume", "Adjust the music volume"),
-                        BotCommand("lyrics", "Get lyrics of the song"),
-                    ],
-                    scope=BotCommandScopeAllGroupChats(),
-                )
-                await self.set_bot_commands(
-                    commands=[
-                        BotCommand("start", "❥ Start the bot"),
-                        BotCommand("ping", "❥ Check the ping"),
-                        BotCommand("help", "❥ Get help"),
-                        BotCommand("vctag", "❥ Tag all for voice chat"),
-                        BotCommand("stopvctag", "❥ Stop tagging for VC"),
-                        BotCommand("tagall", "❥ Tag all members by text"),
-                        BotCommand("cancel", "❥ Cancel the tagging"),
-                        BotCommand("settings", "❥ Get the settings"),
-                        BotCommand("reload", "❥ Reload the bot"),
-                        BotCommand("play", "❥ Play the requested song"),
-                        BotCommand("vplay", "❥ Play video along with music"),
-                        BotCommand("end", "❥ Empty the queue"),
-                        BotCommand("playlist", "❥ Get the playlist"),
-                        BotCommand("stop", "❥ Stop the song"),
-                        BotCommand("lyrics", "❥ Get the song lyrics"),
-                        BotCommand("song", "❥ Download the requested song"),
-                        BotCommand("video", "❥ Download the requested video song"),
-                        BotCommand("gali", "❥ Reply with fun"),
-                        BotCommand("shayri", "❥ Get a shayari"),
-                        BotCommand("love", "❥ Get a love shayari"),
-                        BotCommand("sudolist", "❥ Check the sudo list"),
-                        BotCommand("owner", "❥ Check the owner"),
-                        BotCommand("update", "❥ Update bot"),
-                        BotCommand("gstats", "❥ Get stats of the bot"),
-                        BotCommand("repo", "❥ Check the repo"),
-                    ],
-                    scope=BotCommandScopeAllChatAdministrators(),
-                )
-            except Exception as e:
-                LOGGER(__name__).error(f"Failed to set bot commands: {e}")
+            await self.send_startup_message(button)
 
-        if config.LOG_GROUP_ID:
-            try:
-                chat_member_info = await self.get_chat_member(
-                    config.LOG_GROUP_ID, self.id
-                )
-                if chat_member_info.status != ChatMemberStatus.ADMINISTRATOR:
-                    LOGGER(__name__).error(
-                        "Please promote Bot as Admin in Logger Group"
-                    )
-            except Exception as e:
-                LOGGER(__name__).error(f"Error occurred while checking bot status: {e}")
+        if config.SET_CMDS:
+            await self.set_commands()
+
+        await self.check_admin_status()
 
         LOGGER(__name__).info(f"MusicBot Started as {self.name}")
 
+    async def send_startup_message(self, button):
+        try:
+            await self.send_photo(
+                config.LOG_GROUP_ID,
+                photo=config.START_IMG_URL,
+                caption=(
+                    f"✨ <b>{self.mention}</b> is alive 🖤!\n\n"
+                    f"<b>System Stats:</b>\n"
+                    f"✨  Uptime: 3.11.5\n"
+                    f"☁️  Ram: 13.15\n"
+                    f"❄️  Cpu: 1.34.0\n"
+                    f"🔮  Disk: 2.0.106\n\n"
+                    f"<i>Made {self.mention} with love by ᴅᴇᴠᴇʟᴏᴘᴇʀs✨🥀</i>"
+                ),
+                reply_markup=button,
+            )
+        except pyrogram.errors.ChatWriteForbidden as e:
+            LOGGER(__name__).error(f"Bot cannot write to the log group: {e}")
+            await self.send_message_fallback()
+
+    async def send_message_fallback(self):
+        try:
+            await self.send_message(
+                config.LOG_GROUP_ID,
+                f"✨ <b>{self.mention}</b> is alive 🖤!\n\n"
+                f"<b>System Stats:</b>\n"
+                f"✨  Uptime: 3.11.5\n"
+                f"☁️  Ram: 13.15\n"
+                f"❄️  Cpu: 1.34.0\n"
+                f"🔮  Disk: 2.0.106\n\n"
+                f"<i>Made {self.mention} with love by ᴅᴇᴠᴇʟᴏᴘᴇʀs✨🥀</i>",
+                reply_markup=button,
+            )
+        except Exception as e:
+            LOGGER(__name__).error(f"Failed to send message in log group: {e}")
+
+    async def set_commands(self):
+        commands = [
+            BotCommand("start", "Start the bot"),
+            BotCommand("help", "Get the help menu"),
+            BotCommand("ping", "Check if the bot is alive or dead"),
+            BotCommand("play", "Start playing requested song"),
+            BotCommand("stop", "Stop the current song"),
+            BotCommand("pause", "Pause the current song"),
+            BotCommand("resume", "Resume the paused song"),
+            BotCommand("queue", "Check the queue of songs"),
+            BotCommand("skip", "Skip the current song"),
+            BotCommand("volume", "Adjust the music volume"),
+            BotCommand("lyrics", "Get lyrics of the song"),
+        ]
+
+        await self.set_bot_commands(commands, scope=BotCommandScopeAllPrivateChats())
+
+        admin_commands = [
+            BotCommand("start", "❥ Start the bot"),
+            BotCommand("ping", "❥ Check the ping"),
+            BotCommand("help", "❥ Get help"),
+            BotCommand("vctag", "❥ Tag all for voice chat"),
+            BotCommand("stopvctag", "❥ Stop tagging for VC"),
+            BotCommand("tagall", "❥ Tag all members by text"),
+            BotCommand("cancel", "❥ Cancel the tagging"),
+            BotCommand("settings", "❥ Get the settings"),
+            BotCommand("reload", "❥ Reload the bot"),
+            BotCommand("play", "❥ Play the requested song"),
+            BotCommand("vplay", "❥ Play video along with music"),
+            BotCommand("end", "❥ Empty the queue"),
+            BotCommand("playlist", "❥ Get the playlist"),
+            BotCommand("stop", "❥ Stop the song"),
+            BotCommand("lyrics", "❥ Get the song lyrics"),
+            BotCommand("song", "❥ Download the requested song"),
+            BotCommand("video", "❥ Download the requested video song"),
+            BotCommand("gali", "❥ Reply with fun"),
+            BotCommand("shayri", "❥ Get a shayari"),
+            BotCommand("love", "❥ Get a love shayari"),
+            BotCommand("sudolist", "❥ Check the sudo list"),
+            BotCommand("owner", "❥ Check the owner"),
+            BotCommand("update", "❥ Update bot"),
+            BotCommand("gstats", "❥ Get stats of the bot"),
+            BotCommand("repo", "❥ Check the repo"),
+        ]
+
+        await self.set_bot_commands(admin_commands, scope=BotCommandScopeAllChatAdministrators())
+
+    async def check_admin_status(self):
+        try:
+            chat_member_info = await self.get_chat_member(config.LOG_GROUP_ID, self.id)
+            if chat_member_info.status != ChatMemberStatus.ADMINISTRATOR:
+                LOGGER(__name__).error("Please promote Bot as Admin in Logger Group")
+        except Exception as e:
+            LOGGER(__name__).error(f"Error occurred while checking bot status: {e}")
 
 # Define the async boot function
 async def anony_boot():
     bot = ANNIEBot()
     await bot.start()
     await idle()
-
 
 if __name__ == "__main__":
     LOGGER(__name__).info("Starting Flask server...")
