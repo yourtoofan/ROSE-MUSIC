@@ -3,9 +3,10 @@ from pyrogram import filters, idle
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message
 
 from config import LOG_GROUP_ID
+from ANNIEMUSIC import ANNIEMUSIC  # Ensure ANNIEMUSIC is imported correctly
 
 # Handle /help command in group only
-@app.on_message(filters.command("help"))
+@ANNIEMUSIC.on_message(filters.command("help"))
 async def help_command(client, message: Message):
     if message.chat.type not in ["group", "supergroup"]:
         return  # Ignore if the chat is not a group
@@ -30,7 +31,7 @@ async def help_command(client, message: Message):
     )
 
 # Handle /start command in group only
-@app.on_message(filters.command("start"))
+@ANNIEMUSIC.on_message(filters.command("start"))
 async def start_command(client, message: Message):
     if message.chat.type not in ["group", "supergroup"]:
         return  # Ignore if the chat is not a group
@@ -55,4 +56,3 @@ async def start_command(client, message: Message):
         text=start_text,
         reply_markup=keyboard,
     )
-
