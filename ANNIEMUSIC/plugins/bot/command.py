@@ -6,7 +6,7 @@ from config import LOG_GROUP_ID
 from ANNIEMUSIC import app  # Ensure ANNIEMUSIC is imported correctly
 
 # Handle /help command in group only
-@ANNIEMUSIC.on_message(filters.command("help"))
+@app.on_message(filters.command("help"))
 async def help_command(client, message: Message):
     if message.chat.type not in ["group", "supergroup"]:
         return  # Ignore if the chat is not a group
@@ -31,7 +31,7 @@ async def help_command(client, message: Message):
     )
 
 # Handle /start command in group only
-@ANNIEMUSIC.on_message(filters.command("start"))
+@app.on_message(filters.command("start"))
 async def start_command(client, message: Message):
     if message.chat.type not in ["group", "supergroup"]:
         return  # Ignore if the chat is not a group
