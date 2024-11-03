@@ -6,7 +6,7 @@ from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message
 import config
 from config import BANNED_USERS
 from ANNIEMUSIC import HELPABLE, LOGGER, app, userbot
-from ANNIEMUSIC.core.call import MOON
+from ANNIEMUSIC.core.call import ANNIE
 from ANNIEMUSIC.plugins import ALL_MODULES
 from ANNIEMUSIC.utils.database import get_banned_users, get_gbanned
 
