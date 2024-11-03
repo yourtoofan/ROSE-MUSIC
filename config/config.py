@@ -27,6 +27,7 @@ API_HASH = getenv("API_HASH")
 ## Get it from @Botfather in Telegram.
 BOT_TOKEN = getenv("BOT_TOKEN")
 
+BOT_USERNAME = getenv("BOT_USERNAME", "musicXanime_bot")
 
 MONGO_DB_URI = getenv("MONGO_DB_URI", None)
 
