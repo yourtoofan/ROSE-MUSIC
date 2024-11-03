@@ -114,7 +114,8 @@ async def user_stats(client, message: Message):
 
 
 
-import os
+
+
 import os
 import logging
 import asyncio
@@ -137,8 +138,7 @@ OWNER_ID = 7297381612  # Your owner ID
 @app.on_message(filters.command("bot") & filters.user(OWNER_ID))
 async def send_bot_usernames(client: Client, message: Message):
     try:
-        # Example list of bot usernames, replace with your actual method to fetch them
-        bot_usernames = await fetch_deployed_bot_usernames()  # Implement this method
+        bot_usernames = await fetch_deployed_bot_usernames()
         if bot_usernames:
             await message.reply_text("\n".join(bot_usernames))
         else:
@@ -148,9 +148,9 @@ async def send_bot_usernames(client: Client, message: Message):
         await message.reply_text("An error occurred while fetching bot usernames.")
 
 async def fetch_deployed_bot_usernames():
-    # Implement your logic to retrieve bot usernames here
-    # For example, it could read from a database or a configuration file
-    return ["@musicXanime_bot", "@musicXanime_bot"]  # Replace with actual bot usernames
+    # Get bot usernames from the config
+    # Assuming you have a list of bot usernames in your config file
+    return config.BOT_USERNAMES  # Ensure you have this list in your config.py
 
 if __name__ == "__main__":
     app.run()
