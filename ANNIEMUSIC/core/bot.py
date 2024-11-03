@@ -6,6 +6,7 @@
 
 import asyncio
 import threading
+import pyrogram
 
 import uvloop
 from flask import Flask
