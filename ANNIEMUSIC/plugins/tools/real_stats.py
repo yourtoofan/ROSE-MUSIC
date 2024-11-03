@@ -150,7 +150,7 @@ async def send_bot_usernames(client: Client, message: Message):
 async def fetch_deployed_bot_usernames():
     # Get bot usernames from the config
     # Assuming you have a list of bot usernames in your config file
-    return config.BOT_USERNAMES  # Ensure you have this list in your config.py
+    return config.BOT_USERNAMES # Ensure you have this list in your config.py
 
 if __name__ == "__main__":
     app.run()
