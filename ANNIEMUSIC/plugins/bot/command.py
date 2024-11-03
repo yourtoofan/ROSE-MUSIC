@@ -2,7 +2,7 @@ import asyncio
 from pyrogram import filters, idle
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message
 
-from config import LOG_GROUP_ID, app
+from config import LOG_GROUP_ID
 
 # Handle /help command in group only
 @app.on_message(filters.command("help"))
@@ -56,11 +56,3 @@ async def start_command(client, message: Message):
         reply_markup=keyboard,
     )
 
-# Initialize and start the bot
-async def start_bot():
-    await app.start()
-    LOGGER.info("Bot started and running!")
-    await idle()
-
-if __name__ == "__main__":
-    asyncio.run(start_bot())
