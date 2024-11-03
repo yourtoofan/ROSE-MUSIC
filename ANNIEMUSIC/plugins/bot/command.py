@@ -2,7 +2,7 @@ import asyncio
 from pyrogram import filters, idle
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message
 
-from config import LOGGER, app
+from config import LOG_GROUP_ID, app
 
 # Handle /help command in group only
 @app.on_message(filters.command("help"))
