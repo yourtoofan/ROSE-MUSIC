@@ -263,24 +263,24 @@ async def start_comm(client, message: Message, _):
             await asyncio.sleep(0.1)
             await ANNIEs.edit_text("**⚡ѕтαятιиg....**")
        
-        # Send the start image using config.START_IMG_URL
-        await message.reply_photo(
-            photo=config.START_IMG_URL,
-            caption=_["start_2"].format(message.from_user.mention, app.mention),
-            reply_markup=InlineKeyboardMarkup(out),
-        )
-        
-        # Log the start event in LOG_GROUP_ID if logging is enabled
-        if await is_on_off(config.LOG):
-            sender_id = message.from_user.id
-            sender_name = message.from_user.first_name
-            await app.send_message(
-                LOG_GROUP_ID,
-                f"{message.from_user.mention} ʜᴀs sᴛᴀʀᴛᴇᴅ ʙᴏᴛ. \n\n**ᴜsᴇʀ ɪᴅ :** {sender_id}\n**ᴜsᴇʀ ɴᴀᴍᴇ:** {sender_name}",
-            )
+try:
+    await message.reply_photo(
+        photo=config.START_IMG_URL,
+        caption=_["start_2"].format(message.from_user.mention, app.mention),
+        reply_markup=InlineKeyboardMarkup(out),
+    )
 
-    except Exception as e:
-        print(f"Error: {e}")
+    # Log the start event in LOG_GROUP_ID if logging is enabled
+    if await is_on_off(config.LOG):
+        sender_id = message.from_user.id
+        sender_name = message.from_user.first_name
+        await app.send_message(
+            LOG_GROUP_ID,
+            f"{message.from_user.mention} ʜᴀs sᴛᴀʀᴛᴇᴅ ʙᴏᴛ. \n\n**ᴜsᴇʀ ɪᴅ :** {sender_id}\n**ᴜsᴇʀ ɴᴀᴍᴇ:** {sender_name}",
+        )
+
+except Exception as e:
+    print(f"Error: {e}")
 
 @app.on_message(filters.command(["start"]) & filters.group & ~BANNED_USERS)
 @LanguageStart
