@@ -227,8 +227,7 @@ async def start_comm(client, message: Message, _):
                     config.LOG_GROUP_ID,
                     f"{message.from_user.mention} ʜᴀs ᴊᴜsᴛ sᴛᴀʀᴛᴇᴅ ʙᴏᴛ ᴛᴏ ᴄʜᴇᴄᴋ<code> ᴠɪᴅᴇᴏ ɪɴғᴏʀᴍᴀᴛɪᴏɴ </code>\n\n**ᴜsᴇʀ ɪᴅ:** {sender_id}\n**ᴜsᴇʀ ɴᴀᴍᴇ** {sender_name}",
                 )
-    else:
-
+else:
     try:
         out = music_start_panel(_)
         
@@ -255,6 +254,10 @@ async def start_comm(client, message: Message, _):
         await ANNIEs.edit_text("**⚡ѕтαятιиg....**")
         await asyncio.sleep(0.1)
         await ANNIEs.delete()
+        
+    except Exception as e:
+        # Handle any exceptions here
+        await message.reply_text(f"An error occurred: {e}")
         
         # Send the start image using config.START_IMG_URL
         await message.reply_photo(
