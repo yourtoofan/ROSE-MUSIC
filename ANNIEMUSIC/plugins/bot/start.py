@@ -220,40 +220,48 @@ async def start_comm(client, message: Message, _):
                 reply_markup=key,
             )
             await asyncio.sleep(1)
-if await is_on_off(config.LOG):
-    sender_id = message.from_user.id
-    sender_name = message.from_user.first_name
-    return await app.send_message(
-        config.LOG_GROUP_ID,
-        f"{message.from_user.mention} ʜᴀs ᴊᴜsᴛ sᴛᴀʀᴛᴇᴅ ʙᴏᴛ ᴛᴏ ᴄʜᴇᴄᴋ<code> ᴠɪᴅᴇᴏ ɪɴғᴏʀᴍᴀᴛɪᴏɴ </code>\n\n**ᴜsᴇʀ ɪᴅ:** {sender_id}\n**ᴜsᴇʀ ɴᴀᴍᴇ** {sender_name}",
-    )
-else:
-    try:
-        out = music_start_panel(_)
-        
-        # Animation for start message
-        ANNIE = await message.reply_text("**ᴅιиg ᴅσиg ꨄ︎❣️.....**")
-        await ANNIE.edit_text("**ᴅιиg ᴅσиg ꨄ︎.❣️....**")
-        await ANNIE.edit_text("**ᴅιиg ᴅσиg ꨄ︎..❣️...**")
-        await ANNIE.edit_text("**ᴅιиg ᴅσиg ꨄ︎...❣️..**")
-        await ANNIE.edit_text("**ᴅιиg ᴅσиg ꨄ︎....❣️.**")
-        await ANNIE.edit_text("**ᴅιиg ᴅσиg ꨄ︎.....❣️**")
-        await ANNIE.delete()
+            if await is_on_off(config.LOG):
+                sender_id = message.from_user.id
+                sender_name = message.from_user.first_name
+                return await app.send_message(
+                    config.LOG_GROUP_ID,
+                    f"{message.from_user.mention} ʜᴀs ᴊᴜsᴛ sᴛᴀʀᴛᴇᴅ ʙᴏᴛ ᴛᴏ ᴄʜᴇᴄᴋ<code> ᴠɪᴅᴇᴏ ɪɴғᴏʀᴍᴀᴛɪᴏɴ </code>\n\n**ᴜsᴇʀ ɪᴅ:** {sender_id}\n**ᴜsᴇʀ ɴᴀᴍᴇ** {sender_name}",
+                )
+    else:
 
-        ANNIEs = await message.reply_text("**⚡ѕ**")
-        await asyncio.sleep(0.1)
-        await ANNIEs.edit_text("**⚡ѕт**")
-        await ANNIEs.edit_text("**⚡ѕтα**")
-        await ANNIEs.edit_text("**⚡ѕтαя**")
-        await ANNIEs.edit_text("**⚡ѕтαят**")
-        await ANNIEs.edit_text("**⚡ѕтαятι**")
-        await ANNIEs.edit_text("**⚡ѕтαятιи**")
-        await ANNIEs.edit_text("**⚡ѕтαятιиg**")
-        await ANNIEs.edit_text("**⚡ѕтαятιиg.**")
-        await asyncio.sleep(0.1)
-        await ANNIEs.edit_text("**⚡ѕтαятιиg....**")
-        await asyncio.sleep(0.1)
-        await ANNIEs.delete()
+        try:
+            out = music_start_panel(_)
+            ANNIE = await message.reply_text(f"**ᴅιиg ᴅσиg ꨄ︎❣️.....**")
+            await ANNIE.edit_text(f"**ᴅιиg ᴅσиg ꨄ︎.❣️....**")
+            await ANNIE.edit_text(f"**ᴅιиg ᴅσиg ꨄ︎..❣️...**")
+            await ANNIE.edit_text(f"**ᴅιиg ᴅσиg ꨄ︎...❣️..**")
+            await ANNIE.edit_text(f"**ᴅιиg ᴅσиg ꨄ︎....❣️.**")
+            await ANNIE.edit_text(f"**ᴅιиg ᴅσиg ꨄ︎.....❣️**")
+
+            await ANNIE.delete()
+            ANNIEs = await message.reply_text("**⚡ѕ**")
+            await asyncio.sleep(0.1)
+            await ANNIEs.edit_text("**⚡ѕт**")
+            # await asyncio.sleep(0.1)
+            await ANNIEs.edit_text("**⚡ѕтα**")
+            #  await asyncio.sleep(0.1)
+            await ANNIEs.edit_text("**⚡ѕтαя**")
+            # await asyncio.sleep(0.1)
+            await ANNIEs.edit_text("**⚡ѕтαят**")
+            # await asyncio.sleep(0.1)
+            await ANNIEs.edit_text("**⚡ѕтαятι**")
+            # await asyncio.sleep(0.1)
+            await ANNIEs.edit_text("**⚡ѕтαятιи**")
+            # await asyncio.sleep(0.1)
+            await ANNIEs.edit_text("**⚡ѕтαятιиg**")
+            # await asyncio.sleep(0.1)
+            await ANNIEs.edit_text("**⚡ѕтαятιиg.**")
+            await asyncio.sleep(0.1)
+            await ANNIEs.edit_text("**⚡ѕтαятιиg....**")
+            await asyncio.sleep(0.1)
+            await ANNIEs.edit_text("**⚡ѕтαятιиg.**")
+            await asyncio.sleep(0.1)
+            await ANNIEs.edit_text("**⚡ѕтαятιиg....**")
        
         # Send the start image using config.START_IMG_URL
         await message.reply_photo(
