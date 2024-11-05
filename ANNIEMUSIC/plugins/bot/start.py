@@ -220,13 +220,13 @@ async def start_comm(client, message: Message, _):
                 reply_markup=key,
             )
             await asyncio.sleep(1)
-            if await is_on_off(config.LOG):
-                sender_id = message.from_user.id
-                sender_name = message.from_user.first_name
-                return await app.send_message(
-                    config.LOG_GROUP_ID,
-                    f"{message.from_user.mention} ʜᴀs ᴊᴜsᴛ sᴛᴀʀᴛᴇᴅ ʙᴏᴛ ᴛᴏ ᴄʜᴇᴄᴋ<code> ᴠɪᴅᴇᴏ ɪɴғᴏʀᴍᴀᴛɪᴏɴ </code>\n\n**ᴜsᴇʀ ɪᴅ:** {sender_id}\n**ᴜsᴇʀ ɴᴀᴍᴇ** {sender_name}",
-                )
+if await is_on_off(config.LOG):
+    sender_id = message.from_user.id
+    sender_name = message.from_user.first_name
+    return await app.send_message(
+        config.LOG_GROUP_ID,
+        f"{message.from_user.mention} ʜᴀs ᴊᴜsᴛ sᴛᴀʀᴛᴇᴅ ʙᴏᴛ ᴛᴏ ᴄʜᴇᴄᴋ<code> ᴠɪᴅᴇᴏ ɪɴғᴏʀᴍᴀᴛɪᴏɴ </code>\n\n**ᴜsᴇʀ ɪᴅ:** {sender_id}\n**ᴜsᴇʀ ɴᴀᴍᴇ** {sender_name}",
+    )
 else:
     try:
         out = music_start_panel(_)
@@ -254,11 +254,7 @@ else:
         await ANNIEs.edit_text("**⚡ѕтαятιиg....**")
         await asyncio.sleep(0.1)
         await ANNIEs.delete()
-        
-    except Exception as e:
-        # Handle any exceptions here
-        await message.reply_text(f"An error occurred: {e}")
-        
+       
         # Send the start image using config.START_IMG_URL
         await message.reply_photo(
             photo=config.START_IMG_URL,
