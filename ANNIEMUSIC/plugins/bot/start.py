@@ -68,7 +68,7 @@ async def start_comm(client, message: Message, _):
     # Send a sticker when the bot starts
     await message.reply_sticker("CAACAgUAAxkDAAIEoWcm-PmfbFGDQWZ7u5kyCQUfqzFiAAIeCgACya4ZVWcoG8RVlky8NgQ")  # Replace with your sticker file ID or URL
 
-    await message.react("🦋")
+    await message.react("🕊️")
     if len(message.text.split()) > 1:
         name = message.text.split(None, 1)[1]
         if name[0:4] == "help":
