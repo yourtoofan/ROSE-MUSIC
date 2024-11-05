@@ -75,7 +75,6 @@ async def start_comm(client, message: Message, _):
             keyboard = InlineKeyboardMarkup(
                 paginate_modules(0, HELPABLE, "help", close=True)
             )
-            )
             if config.START_IMG_URL:
                 return await message.reply_photo(
                     photo=START_IMG_URL,
