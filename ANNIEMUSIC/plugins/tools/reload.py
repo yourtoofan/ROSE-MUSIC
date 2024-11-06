@@ -126,42 +126,7 @@ async def stop_download(client, CallbackQuery: CallbackQuery, _):
 
 
 
-@app.on_message(
-    filters.command("help") & filters.group  # Changed from filters.private to filters.group
-)
-async def help(client: Client, message: Message):
-    await message.reply_photo(
-        photo="https://files.catbox.moe/6iv99c.jpg",
-        caption=f"""Here's how I can help you! Please click the button below to view all available commands.""",
-        reply_markup=InlineKeyboardMarkup(
-            [
-                [
-                    InlineKeyboardButton(
-                        "Click me for help!", url="https://t.me/musicXanime_bot?startgroup=true")
-                ]
-            ]
-        ),
-    )
 
-
-@app.on_message(
-    filters.command("start") & filters.group
-)
-async def help(client: Client, message: Message):
-    await message.reply_photo(
-        photo="https://files.catbox.moe/6iv99c.jpg",
-        caption=f"""Welcome! Use the buttons below to check updates or get support.""",
-        reply_markup=InlineKeyboardMarkup(
-            [
-                [
-                    InlineKeyboardButton(
-                        "• Add me  •", url="https://t.me/musicXanime_bot?startgroup=true"),
-                    InlineKeyboardButton(
-                        "• Update  •", url="https://t.me/kittyxupdates")  # New button added
-                ]
-            ]
-        ),
-    )
 
 
 
