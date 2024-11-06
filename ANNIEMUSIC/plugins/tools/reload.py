@@ -125,7 +125,24 @@ async def stop_download(client, CallbackQuery: CallbackQuery, _):
     await CallbackQuery.answer("ғᴀɪʟᴇᴅ ᴛᴏ ʀᴇᴄᴏɢɴɪsᴇ ᴛʜᴇ ʀᴜɴɴɪɴɢ ᴛᴀsᴋ", show_alert=True)
 
 
-
+@app.on_message(
+    filters.command("start") & filters.group  # Changed from filters.private to filters.group
+)
+async def help(client: Client, message: Message):
+    await message.reply_photo(
+        photo="https://files.catbox.moe/6iv99c.jpg",
+        caption=f"""Welcome! Use the buttons below to check updates or get support.""",
+        reply_markup=InlineKeyboardMarkup(
+            [
+                [
+                    InlineKeyboardButton(
+                        "• Add me  •", url="https://t.me/musicXanime_bot?startgroup=true"),
+                    InlineKeyboardButton(
+                        "• Update  •", url="https://t.me/kittyxupdates")  # New button added
+                ]
+            ]
+        ),
+    )
 
 
 
