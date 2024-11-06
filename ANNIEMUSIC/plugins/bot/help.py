@@ -150,12 +150,23 @@ async def helper_private(
             )
 
 
-@app.on_message(filters.command(["help"]) & filters.private & ~BANNED_USERS)
+@app.on_message(filters.command("help") & filters.private & ~BANNED_USERS)
 @LanguageStart
-async def help_com_group(client, message: Message, _):
-    keyboard = settings_back_helper(_)
-    await message.reply_text(_["help_2"], reply_markup=InlineKeyboardMarkup(keyboard))
-
+async def help_command(client, message):
+    # Define the buttons
+    keyboard = InlineKeyboardMarkup(
+        [
+            [InlineKeyboardButton("• Open in private •", url="https://t.me/MeowstericXBot?start=help")],
+            [InlineKeyboardButton("• Open here •", callback_data="features")]
+        ]
+    )
+    
+    # Send photo with text and buttons
+    await message.reply_photo(
+        photo="https://envs.sh/jl2.png",  # Replace with your photo path or URL
+        caption="» Choose an way to get help from me ✨",
+        reply_markup=keyboard
+    )
 
 async def help_parser(name, keyboard=None):
     if not keyboard:
