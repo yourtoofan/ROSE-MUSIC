@@ -150,7 +150,18 @@ async def helper_private(
             )
 
 
-@app.on_message(filters.command("help") & filters.private & ~BANNED_USERS)
+@app.on_message(filters.command(HELP_COMMAND) & filters.group & ~BANNED_USERS)
+@LanguageStart
+async def help_com_group(client, message: Message, _):
+    keyboard = private_help_panel(_)
+    await message.reply_text(_["help_2"], reply_markup=InlineKeyboardMarkup(keyboard))
+
+async def help_parser(name, keyboard=None):
+    if not keyboard:
+        keyboard = InlineKeyboardMarkup(paginate_modules(0, HELPABLE, "help"))
+    return keyboard
+
+@app.on_message(filters.command("help") & filters.group & ~BANNED_USERS)
 @LanguageStart
 async def help_command(client, message):
     # Define the buttons
@@ -164,14 +175,27 @@ async def help_command(client, message):
     # Send photo with text and buttons
     await message.reply_photo(
         photo="https://envs.sh/jl2.png",  # Replace with your photo path or URL
-        caption="» Choose an way to get help from me ✨",
+        caption="» Choose a way to get help from me ✨",
+        reply_markup=keyboard
+            )
+
+@app.on_message(filters.command("start") & filters.group & ~BANNED_USERS)
+@LanguageStart
+async def help_command(client, message):
+    # Define the buttons
+    keyboard = InlineKeyboardMarkup(
+        [
+            [InlineKeyboardButton("• Add me •", url="https://t.me/MeowstericXBot?startgroup=true")],
+            [InlineKeyboardButton("• Update •", url="https://t.me/kittyxupdates")]
+        ]
+    )
+    
+    # Send photo with text and buttons
+    await message.reply_photo(
+        photo="https://envs.sh/jl2.png",  # Replace with your photo path or URL
+        caption="» Here's how I can help you! Please click the button below to view all available commands. ✨",
         reply_markup=keyboard
     )
-
-async def help_parser(name, keyboard=None):
-    if not keyboard:
-        keyboard = InlineKeyboardMarkup(paginate_modules(0, HELPABLE, "help"))
-    return keyboard
 
 
 @app.on_callback_query(filters.regex(r"help_(.*?)"))
