@@ -54,7 +54,7 @@ EXTRA_PLUGINS = getenv(
 
 EXTRA_PLUGINS_REPO = getenv(
     "EXTRA_PLUGINS_REPO",
-    "https://github.com/Moonshining1/Extra-Plugin", 
+    "https://github.com/yourtoofan/EXTRAPLUGIN", 
 )
 # iss link ko mt remove krna harmai ye management wlaa hai isme hi sub code hai management ke liye..
 # Fill here the external plugins repo where plugins that you want to load
